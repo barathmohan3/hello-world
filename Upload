@@ -1,0 +1,8 @@
+🔍 CloudWatch is AWS's monitoring and observability service.
+
+📊 It collects:
+- Metrics (e.g., CPU, memory)
+- Logs (e.g., app/server logs)
+- Events (e.g., EC2 status changes)
+
+📈 You can visualize this data using dashboards.
