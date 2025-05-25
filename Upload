@@ -22,3 +22,11 @@ Monitor health and performance of AWS resources
 🔁 Automatically trigger actions (e.g., restart EC2)  
 📉 Centralized log monitoring  
 📊 Create custom dashboards
+
+
+Core Components:
+- Metrics: e.g., CPUUtilization
+- Logs: App/system logs
+- Alarms: Notify or act when thresholds are breached
+- Dashboards: Graphs and charts
+- Events: Automate reactions to changes
