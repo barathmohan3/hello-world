@@ -30,3 +30,13 @@ Core Components:
 - Alarms: Notify or act when thresholds are breached
 - Dashboards: Graphs and charts
 - Events: Automate reactions to changes
+
+
+CloudTrail records every **API call** made in AWS.
+
+It tracks:
+- Who performed the action
+- What action was taken
+- When and from where
+
+Used for **auditing, security, and compliance.**
