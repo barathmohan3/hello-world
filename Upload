@@ -63,3 +63,16 @@ Know who did what in your AWS account
 🔁 Works across regions and services
 
 
+Use Case: Bucket was deleted accidentally
+
+👣 Steps:
+1. Go to CloudTrail → Event History
+2. Search: Event Name = DeleteBucket
+3. Review details:
+   - Username
+   - Time
+   - Region
+   - IP Address
+
+🔒 Now you know exactly who did it and w
+
