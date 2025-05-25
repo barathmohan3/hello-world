@@ -47,3 +47,10 @@ Think of CloudTrail as **CCTV in a bank**:
 - When and how (Time, IP, Region)
 
 It helps you investigate incidents and track history.
+
+Know who did what in your AWS account  
+🧾 Comply with audit and security policies  
+🚨 Detect unauthorized access or changes  
+🕰️ See all actions in the last 90 days (default)
+
+
