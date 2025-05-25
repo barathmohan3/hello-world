@@ -6,3 +6,12 @@
 - Events (e.g., EC2 status changes)
 
 📈 You can visualize this data using dashboards.
+
+
+CloudWatch is like your **bike or car dashboard**:
+- Speed → CPU usage
+- Engine temp → Disk I/O
+- Fuel level → Memory
+- Red warning light → Alarm
+
+It tells you when something goes wrong and helps you fix it.
