@@ -15,3 +15,10 @@ CloudWatch is like your **bike or car dashboard**:
 - Red warning light → Alarm
 
 It tells you when something goes wrong and helps you fix it.
+
+
+Monitor health and performance of AWS resources  
+📬 Get alerts via email/SMS when thresholds are crossed  
+🔁 Automatically trigger actions (e.g., restart EC2)  
+📉 Centralized log monitoring  
+📊 Create custom dashboards
