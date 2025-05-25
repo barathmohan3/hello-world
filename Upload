@@ -40,3 +40,10 @@ It tracks:
 - When and from where
 
 Used for **auditing, security, and compliance.**
+
+Think of CloudTrail as **CCTV in a bank**:
+- Records who entered (User)
+- What they did (Create/Delete)
+- When and how (Time, IP, Region)
+
+It helps you investigate incidents and track history.
