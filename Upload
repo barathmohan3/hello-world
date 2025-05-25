@@ -54,3 +54,12 @@ Know who did what in your AWS account
 🕰️ See all actions in the last 90 days (default)
 
 
+🧱 Core Concepts:
+- Events: Each API call (e.g., RunInstances)
+- Event History: View 90 days by default
+- Trails: Save logs in S3 for long-term use
+- Insights: Detect unusual activity (e.g., login spike)
+
+🔁 Works across regions and services
+
+
