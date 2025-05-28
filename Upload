@@ -8,7 +8,7 @@
 📈 You can visualize this data using dashboards.
 
 
-CloudWatch is like your **bike or car dashboard**:
+CloudWatch is like youri **bike or car dashboard**:
 - Speed → CPU usage
 - Engine temp → Disk I/O
 - Fuel level → Memory
@@ -81,4 +81,20 @@ sudo yum install -y yum-utils
 sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
 sudo yum -y install terraform
 
+
+name: Simple S3 Create
+
+on: [workflow_dispatch]
+
+jobs:
+  create-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - run: aws s3 mb s3://my-simple-gh-bucket-${{ github.run_id }}
 
