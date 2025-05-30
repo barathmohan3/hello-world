@@ -96,5 +96,39 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - run: aws s3 mb s3://my-simple-gh-bucket-${{ github.run_id }}
+      - run: aws s3 mb s3://my-simple-gh-bucket-${{ github.run_id }}r
+
+
+
+
+terraform {
+  backend "s3" {
+    bucket         = "your-terraform-state-bucket"
+    key            = "alb-path-routing/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"
+    encrypt        = true
+  }
+}
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+
+
+
+variable "vpc_cidr" {
+  default = "10.0.0.0/16"
+}
+
+variable "public_subnets" {
+  default = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+}
+
+variable "availability_zones" {
+  default = ["us-east-1a", "us-east-1b", "us-east-1c"]
+}
+
+
 
