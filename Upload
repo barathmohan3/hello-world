@@ -131,4 +131,24 @@ variable "availability_zones" {
 }
 
 
+#!/bin/bash
+yum install -y nginx
+echo "<h1>Homepage</h1>" > /usr/share/nginx/html/index.html
+systemctl start nginx
+systemctl enable nginx
+
+#!/bin/bash
+yum install -y nginx
+mkdir -p /usr/share/nginx/html/images
+echo "<h1>Images Path</h1>" > /usr/share/nginx/html/images/index.html
+systemctl start nginx
+systemctl enable nginx
+
+#!/bin/bash
+yum install -y nginx
+mkdir -p /usr/share/nginx/html/register
+echo "<h1>Register Page</h1>" > /usr/share/nginx/html/register/index.html
+systemctl start nginx
+systemctl enable nginx
+
 
