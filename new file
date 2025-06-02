@@ -513,3 +513,8 @@ The workflow should:
 •	Generate Terraform Plan 
 •	Static code analysis with TFlint
 --> use checkov
+
+
+
+
+https://github.com/lavanya24072000/usecases/edit/USECASE-02
