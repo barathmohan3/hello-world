@@ -1,0 +1,206 @@
+# --------------------
+# Terraform: Expense Tracker Infra (modular)
+# --------------------
+
+# Root main.tf
+module "api_gateway" {
+  source = "./modules/api_gateway"
+}
+
+module "lambda" {
+  source = "./modules/lambda"
+}
+
+module "dynamodb" {
+  source = "./modules/dynamodb"
+}
+
+output "api_gateway_url" {
+  value = module.api_gateway.api_url
+}
+
+# --------------------
+# modules/api_gateway/main.tf
+# --------------------
+resource "aws_api_gateway_rest_api" "expense_api" {
+  name        = "ExpenseTrackerAPI"
+  description = "API for managing daily expenses"
+}
+
+resource "aws_api_gateway_resource" "expenses" {
+  rest_api_id = aws_api_gateway_rest_api.expense_api.id
+  parent_id   = aws_api_gateway_rest_api.expense_api.root_resource_id
+  path_part   = "expenses"
+}
+
+resource "aws_api_gateway_resource" "summary" {
+  rest_api_id = aws_api_gateway_rest_api.expense_api.id
+  parent_id   = aws_api_gateway_rest_api.expense_api.root_resource_id
+  path_part   = "summary"
+}
+
+resource "aws_api_gateway_method" "get_expenses" {
+  rest_api_id   = aws_api_gateway_rest_api.expense_api.id
+  resource_id   = aws_api_gateway_resource.expenses.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "get_summary" {
+  rest_api_id   = aws_api_gateway_rest_api.expense_api.id
+  resource_id   = aws_api_gateway_resource.summary.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "lambda_expenses_get" {
+  rest_api_id             = aws_api_gateway_rest_api.expense_api.id
+  resource_id             = aws_api_gateway_resource.expenses.id
+  http_method             = aws_api_gateway_method.get_expenses.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = module.lambda.lambda_invoke_arn
+}
+
+resource "aws_api_gateway_integration" "lambda_summary_get" {
+  rest_api_id             = aws_api_gateway_rest_api.expense_api.id
+  resource_id             = aws_api_gateway_resource.summary.id
+  http_method             = aws_api_gateway_method.get_summary.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = module.lambda.lambda_invoke_arn
+}
+
+resource "aws_api_gateway_deployment" "deployment" {
+  depends_on = [
+    aws_api_gateway_integration.lambda_expenses_get,
+    aws_api_gateway_integration.lambda_summary_get
+  ]
+  rest_api_id = aws_api_gateway_rest_api.expense_api.id
+  stage_name  = "prod"
+}
+
+output "api_url" {
+  value = "https://${aws_api_gateway_rest_api.expense_api.id}.execute-api.${var.region}.amazonaws.com/prod"
+}
+
+# --------------------
+# modules/lambda/main.tf
+# --------------------
+resource "aws_iam_role" "lambda_exec" {
+  name = "lambda_exec_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+      Effect = "Allow"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "expense_handler" {
+  filename         = "lambda.zip"
+  function_name    = "ExpenseTrackerHandler"
+  role             = aws_iam_role.lambda_exec.arn
+  handler          = "lambda_function.handler"
+  source_code_hash = filebase64sha256("lambda.zip")
+  runtime          = "python3.11"
+}
+
+output "lambda_invoke_arn" {
+  value = aws_lambda_function.expense_handler.invoke_arn
+}
+
+# --------------------
+# modules/dynamodb/main.tf
+# --------------------
+resource "aws_dynamodb_table" "expenses" {
+  name           = "Expenses"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "userId"
+  range_key      = "date"
+
+  attribute {
+    name = "userId"
+    type = "S"
+  }
+
+  attribute {
+    name = "date"
+    type = "S"
+  }
+}
+
+output "table_name" {
+  value = aws_dynamodb_table.expenses.name
+}
+
+# --------------------
+# lambda_function.py (for lambda.zip)
+# --------------------
+
+def handler(event, context):
+    import json
+
+    user_id = event['headers'].get('user-id', 'guest-user')
+    query = event.get('queryStringParameters') or {}
+
+    if 'date' in query:
+        return {
+            "statusCode": 200,
+            "body": json.dumps({
+                "user": user_id,
+                "date": query['date'],
+                "expenses": [
+                    {"amount": 100, "category": "Food"},
+                    {"amount": 200, "category": "Transport"}
+                ]
+            })
+        }
+    elif 'month' in query:
+        return {
+            "statusCode": 200,
+            "body": json.dumps({
+                "user": user_id,
+                "month": query['month'],
+                "summary": {
+                    "Food": 500,
+                    "Transport": 300
+                }
+            })
+        }
+    else:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Missing date or month query param"})
+        }
+
+# --------------------
+# Basic HTML UI (index.html)
+# --------------------
+<!DOCTYPE html>
+<html>
+<head><title>Expense Tracker</title></head>
+<body>
+<h2>Daily Expenses</h2>
+<input type="date" id="dateInput">
+<button onclick="fetchExpenses()">Get Expenses</button>
+<pre id="output"></pre>
+<script>
+  async function fetchExpenses() {
+    const date = document.getElementById('dateInput').value;
+    const res = await fetch(`https://abc123xyz.execute-api.us-east-2.amazonaws.com/prod/expenses?date=${date}`);
+    const data = await res.json();
+    document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+  }
+</script>
+</body>
+</html>
