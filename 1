@@ -1,18 +1,10 @@
-resource "aws_instance" "openproject" {
+
   ami                    = var.ami
   instance_type          = var.instance_type
   subnet_id              = var.subnet_1
-  vpc_security_group_ids = [var.sg_id]
+
   associate_public_ip_address = true
 
-  user_data = <<-EOT
-    #!/bin/bash
-    apt-get update -y
-    apt-get install -y docker.io
-    systemctl start docker
-    systemctl enable docker
-    docker run -dit -p 80:80 -e OPENPROJECT_SECRET_KEY_BASE=secret -e OPENPROJECT_HOST__NAME=0.0.0.0:80 -e OPENPROJECT_HTTPS=false openproject/community:12
-  EOT
 
   tags = merge(var.tags, {
     Name = "${lookup(var.tags, "Name", "default")}-OpenProject"
@@ -65,3 +57,60 @@ variable "openproject_tg_arn" {}
 variable "devlake_tg_arn" {}
 
 
+
+
+
+
+Use Case: Building a Serverless Daily Expense Tracker API with Terraform and AWS
+
+⸻
+
+Objective:
+
+Automate the deployment of a serverless backend using AWS services for a Daily Expense Tracker application. Users should be able to add expenses, retrieve them by date, and get a monthly summary using REST API endpoints. The infrastructure must be managed through Terraform, and CI/CD should be set up via GitHub Actions.
+
+⸻
+
+Components:
+	1.	Terraform: For provisioning serverless AWS infrastructure
+	2.	AWS Lambda: To execute backend business logic
+	3.	AWS API Gateway: To expose REST API endpoints
+	4.	DynamoDB: To store user expense data (partition key: userId, sort key: date)
+	5.	CloudWatch Logs: For monitoring Lambda execution
+	6.	GitHub Actions: CI/CD pipeline for infra and Lambda code deployment
+
+⸻
+
+Steps:
+	1.	Write Lambda Handler Code
+	•	Accept requests from API Gateway
+	•	Handle /expenses and /summary routes
+	•	Read and write data to DynamoDB
+	•	Return JSON responses
+	2.	Set Up Terraform Configuration
+	•	Create modules for Lambda, API Gateway, and (optionally) DynamoDB
+	•	Add API Gateway resources and methods
+	•	Wire up API Gateway → Lambda via integrations
+	•	Add Lambda permissions
+	3.	Initialize and Apply Terraform Configuration
+	•	Run terraform init to initialize
+	•	Run terraform apply to provision infrastructure
+	•	Output the API Gateway endpoint URL
+	4.	Set Up GitHub Actions (CI/CD)
+	•	Workflow for Lambda code: Lint → Zip → Deploy
+	•	Workflow for Terraform: Format → Plan → Apply on merge
+	5.	Test the API
+	•	Use Postman or curl to test:
+	•	POST /expenses with expense data
+	•	GET /expenses?date=YYYY-MM-DD
+	•	GET /summary?month=YYYY-MM
+	•	Ensure headers like user-id are handled
+	6.	Enable Logging
+	•	CloudWatch Logs to capture all Lambda executions
+	•	View logs for debugging and monitoring
+
+⸻
+
+Outcome:
+
+A fully serverless, API-driven backend for expense tracking, provisioned using Terraform and deployed using CI/CD. The application supports basic expense operations and logs all executions via CloudWatch
