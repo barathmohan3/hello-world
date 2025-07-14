@@ -1,0 +1,91 @@
+Objective : Observability, Alerting, Dashboarding, and Auto-Remediation
+
+Your company runs a customer-facing legacy app (Python Flask-based) on a single VM. The app recently suffered multiple outages due to lack of observability and slow incident response.
+
+You're tasked with
+
+· Instrumenting the services and system
+
+· Visualizing key metrics
+
+· Creating actionable alerts
+
+· Automating basic alert responses
+
+1. Setup Monitoring Stack
+
+Install and configure:
+
+· Prometheus
+
+· Node Exporter
+
+· Alert manager
+
+· Grafana
+
+Configure Prometheus scrape jobs:
+
+· Flask app (localhost:5000/metrics) for App metrics
+
+· Node Exporter (localhost:9100) for system metrics
+
+2. Instrument Flask Application
+
+Integrate Prometheus metrics:
+
+pip install flask prometheus_flask_exporter
+
+Use metrics:
+
+· HTTP request count & duration
+
+· Error count
+
+· Create Custom metric - Total number of orders created (e.g., /api/orders count)
+
+· rate(flask_http_request_total[1m])
+
+· rate(flask_http_request_total{status="500"}[1m])
+
+· rate(flask_http_request_duration_seconds_sum[1m]) / rate(flask_http_request_duration_seconds_count[1m])
+
+3. Build Grafana Dashboards
+
+Create dashboards with:
+
+· Request Rate
+
+· Error Rate (4xx/5xx)
+
+· Avg & P95 Latency
+
+· System Metrics (CPU, Memory, Disk)
+
+· Top Endpoints by Volume/Latency
+
+4 . Configure Prometheus Alerting
+
+Create alerts for:
+
+· App error rate >5% (status=5xx)
+
+· High latency (P95 >1s)
+
+· High memory (>85%)
+
+· Disk usage >90%
+
+· App down (no /health calls in 5 min)
+
+· Email, Slack with AlertManager
+
+5. Implement Auto-Remediation
+
+Write Bash/Python scripts triggered by Alertmanager:
+
+· Restart Flask app if high memory
+
+· Clean up /tmp if disk full
+
+· Log alert details (alerts.log)
