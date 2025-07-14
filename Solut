@@ -1,0 +1,130 @@
+Here’s a refined question document based on the Docker setup guide you shared, outlining the problem, objectives, tools, verification steps, alert rules, remediation actions, and extension ideas. You can use this for stakeholder alignment, team guides, or project kick‑off docs.
+
+⸻
+
+📌 Problem Statement
+
+Customer-facing legacy Flask application running on a single VM has suffered from repeated outages. The issues stem from:
+	•	No observability: Lack of metrics to track performance and health.
+	•	Slow incident response: Alerts are absent or poorly actionable.
+	•	Manual remediation: Recovery steps are slow and prone to error.
+
+⸻
+
+🎯 Objectives
+	1.	Instrument services & system to generate valuable runtime and infrastructure metrics.
+	2.	Visualize metrics via dashboards for real-time monitoring and insights.
+	3.	Create actionable alerts for deviations and outages.
+	4.	Automate basic remediation to reduce mean time to recovery (MTTR).
+
+⸻
+
+🛠️ Stack & Tools Used
+	•	Flask application with Prometheus exporter (/metrics)
+	•	Docker Compose orchestrating services:
+	•	Prometheus (scraping both Flask and Node Exporter)
+	•	Node Exporter (system metrics)
+	•	Alertmanager
+	•	Grafana (with pre-provisioned dashboards and datasources)
+	•	Flask health/error/simulate endpoints
+	•	Remediation scripts in Bash/Python
+	•	Configuration files:
+	•	prometheus.yml, alert_rules.yml, alertmanager.yml
+	•	docker-compose.yml
+	•	Grafana provisioning: datasources + dashboards
+	•	remediation_scripts/alert_webhook.py, cleanup_disk.sh, restart_app.sh
+
+⸻
+
+✅ Verification & Testing Steps
+
+Deployment & Status
+	•	docker-compose up -d
+	•	docker-compose ps → ensures all services are Up
+
+Access UIs
+	•	Flask app: http://localhost:5000
+	•	Prometheus: http://localhost:9090
+	•	Grafana: http://localhost:3000 (default login: admin/admin)
+	•	Alertmanager: http://localhost:9093
+	•	Node Exporter: http://localhost:9100
+
+Generate Traffic & Validate Metrics
+
+# Normal traffic
+for i in {1..10}; do curl -X POST http://localhost:5000/api/orders ...; done
+
+# Errors
+for i in {1..5}; do curl http://localhost:5000/api/simulate-error?type=server; done
+
+# Slow responses
+curl http://localhost:5000/api/simulate-slow?delay=3
+
+# Memory stress
+curl http://localhost:5000/api/memory-stress?size=50
+
+Check scraping and data:
+
+curl http://localhost:5000/metrics | grep flask_
+curl "http://localhost:9090/api/v1/query?query=flask_http_request_total"
+
+Test Alerts & Remediation
+
+# Trigger a fake alert
+curl -X POST http://localhost:9093/api/v1/alerts -d '[{"labels":{...}}]'
+
+# Confirm webhook and remediation logs
+docker-compose logs alert-webhook
+tail logs/alerts.log
+
+
+⸻
+
+🚨 Alert Rules & Conditions
+
+Defined in alert_rules.yml:
+
+Alert	Condition
+HighErrorRate	Error rate > 5% for 2 min
+HighLatency	P95 latency > 1 s for 2 min
+AppDown	App unreachable for 1 min
+NoHealthChecks	No /health calls for 5 min
+HighMemoryUsage	Memory > 85% for 2 min
+HighDiskUsage	Disk > 90% for 1 min
+HighCPUUsage	CPU > 80% for 5 min
+
+Notifications via Email and Slack using Alertmanager.
+
+⸻
+
+🔧 Auto-Remediation Actions
+
+Managed by alert_webhook.py + shell scripts:
+	•	HighMemoryUsage → restart Flask container
+	•	AppDown → attempt restart of Flask container
+	•	HighDiskUsage → run cleanup_disk.sh to clear /tmp and logs
+
+All performed actions logged to alerts.log.
+
+⸻
+
+✅ How to Check & Verify
+	1.	Trigger a memory spike → watch Alertmanager fire → auto-restart container → check logs.
+	2.	Fill disk → watch cleanup script removal of temp files → verify free space.
+	3.	Stop Flask manually → AppDown alert → container automatically restarts.
+
+⸻
+
+🧠 Extensions & Next Steps
+	•	Add custom metrics in app.py (e.g. CUSTOM_COUNTER)
+	•	Extend alert rules for business logic
+	•	Integrate Email/Slack in alertmanager.yml
+	•	Hardening/security: remove default credentials, secure endpoints, manage secrets
+	•	Production grade: persistent volumes, scrape tuning, retention policy
+	•	Scale with Kubernetes or Swarm, use Prometheus federation
+	•	Add logging with ELK/Loki, and tracing (Jaeger)
+	•	Set up CI/CD automation for deployments and monitoring updates
+
+⸻
+
+You can refine or expand each section based on your audience (SRE team, leadership, developers). Feel free to ask if you’d like diagrams, slide decks, or deeper implementation details!
