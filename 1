@@ -121,3 +121,16 @@ while ($true) {
   [System.Windows.Forms.SendKeys]::SendWait("{SCROLLLOCK}")
   Start-Sleep -Seconds 60
 }
+
+Add-Type -AssemblyName System.Windows.Forms
+
+while ($true) {
+    $notepad = Get-Process | Where-Object { $_.MainWindowTitle -like "*Notepad*" }
+
+    if ($notepad) {
+        [System.Windows.Forms.SendKeys]::SendWait("auto typing... ")
+    }
+
+    Start-Sleep -Seconds 300
+}
+
