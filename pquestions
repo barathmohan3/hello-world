@@ -1,0 +1,38 @@
+Suppose you refresh the Terraform state to sync it with the actual infrastructure.
+What might you expect to happen during the next apply operation if nothing has
+changed manually?
+2. If I already have existing resources in the cloud, how can I manage them using
+Terraform?
+3. I have two AWS accounts: Account A and Account B. I have a Lambda function in
+Account A. How can I trigger this Lambda from Account B using a role?
+4. How can we dynamically pass the Terraform backend configuration?
+5. In ECS, which approach is better: one service with different task definitions or one
+service per task definition? Why?
+6. If I already have a container running on port 80 in ECS, can I run another container
+using the same service?
+7. In Terraform, how can I prevent a specific resource from being destroyed?
+8. Why do we use provisioners in Terraform? Provide a use case with step-by-step
+configuration.
+9. Why do we use multi-stage builds in Docker? How is it helpful, and in what
+scenarios should we use it?
+10. When writing a Dockerfile, have you thought about where the base image actually
+comes from and how Docker retrieves it?
+11. What are the different types of roles used in ECS task definitions? Which role is
+used for which scenario?
+12. What are the different routing policies available in Route 53?
+13. How does failover routing work in Route 53? In which scenarios should we use it?
+14. If I already have an ECS application using an ALB, can I deploy another
+application using the same ALB? If yes, how? Explain the steps.
+What is a critical service in Kubernetes?
+16. What is etcd in Kubernetes, and what kind of data does it store?
+17. What is an ingress in Kubernetes? Why do we use ingress instead of services
+alone?
+18. Your QA team needs to run automated tests on every pull request. How would you
+support them using GitHub Actions?
+19. What happens when I run terraform init?
+20. What information is stored in .terraform.lock.hcl? How is it useful?
+21. You're switching branches during a hotfix, but don’t want to lose your current
+work. Later, you want to clean up commit history before merging. Which Git
+features can help in each case?
+22. Have you ever encountered a Terraform state lock issue? What caused it, and how
+did you identify and resolve the problem
