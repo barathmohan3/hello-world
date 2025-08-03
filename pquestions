@@ -36,3 +36,41 @@ work. Later, you want to clean up commit history before merging. Which Git
 features can help in each case?
 22. Have you ever encountered a Terraform state lock issue? What caused it, and how
 did you identify and resolve the problem
+
+Anil:
+1. Tell me about yourself?
+2. I want to deploy 10 ec2 instances in dev env and 20 ec2 instances in production env how can i deploy using terraform 
+3. How can you import existing resources into terraform and what is the command need to use to import ?
+4. what are the data types in terraform?
+5. what is permission boundary in iam?
+6. How can we store sensitive information in terraform and how it integrates with aws services?
+7. My statefile is in remote backend, now i want to make changes manually in terraform statefile how can i do changes?
+8. Can i pass child module inputs in root module if yes, how can i explain it?
+9. How can i reduce the cost in ecs fargate and how you save the cost with spot instances?
+10. How can you integrate oidc with gitub actions workflows?
+11. What are the monitoring services in AWS?
+12. How can i use zero down time deployment in aws ecs?
+13. What are the services we can use to store secrets in AWS?
+14. Is scaling is supported in AWS Ecs Fargate, how ?
+15. How can i use my application dependencies in AWS Lambda?
+16. How can i schedule an event in Aws Lambda?
+
+kasi:
+1. Self Introduction?
+2. What is the toughest challange you faced in your previous organization?
+3. What are policies's will you attach to api gateway to invoke lambda function?
+4. Troubleshooting steps for pod in crashloopbackoff in k8s?
+5. Upgrading procedure for a EKS cluster?
+6. About taints, toleration , affinities?
+7. How do you delete any particular resource from terraform?
+8. How you use multi cloud in terraform?
+9. What are the best practices you can use in GitHub workflow?
+10. About lambda step functions & with real time usecase?
+11. Explain the life cycle configuration in S3?
+12. Explain the Lambda function and why do we use it?
+13. what is meant by metrics?
+14. Terraform multiple account resource creation witl same configuration & about workspace?
+15. Type of resource names & how to attach policies to iam role with terraform configuration?
+16. If i want to run single pod in a specific az how to achieve this?
+17. About lambda step functions & real time usecase?
+18. Asked about terraform code explaination?
