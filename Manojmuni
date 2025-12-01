@@ -1,25 +1,41 @@
-# safe pod spec snippet for Jenkins podTemplate / helm template
-initContainers:
-  - name: "{{ (default .Chart.Name \"app\") | lower }}-init"
-    image: "{{ .Values.image.registry }}/{{ .Values.image.namespace }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-    command: [ "/bin/bash", "-c" ]
-    args: [ "cp -r ${SCRIPTS_DIR} /mnt/fabric-jar-exec" ]
-    imagePullPolicy: "{{ .Values.image.pullPolicy }}"
-    resources:
-      limits:
-        memory: 100Mi
-      requests:
-        memory: 100Mi
-    volumeMounts:
-      - name: scripts
-        mountPath: /mnt/fabric-jar-exec
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jenkins-agent
+spec:
+  nodeSelector:
+    beta.kubernetes.io/os: linux
+  activeDeadlineSeconds: 10800
 
-containers:
-  - name: "{{ (default .Chart.Name \"app\") | lower }}"
-    image: "{{ .Values.image.registry }}/{{ .Values.jdk.image.namespace }}/java-open-jdk:{{ .Values.jdk.image.tag }}"
-    command: [ "/bin/bash", "-c" ]
-    args: [ "${SCRIPTS_DIR}/start.sh" ]
-    imagePullPolicy: "{{ .Values.image.pullPolicy }}"
-    volumeMounts:
-      - name: scripts
-        mountPath: /mnt/fabric-jar-exec
+  volumes:
+    - name: scripts
+      emptyDir: {}
+
+  imagePullSecrets:
+    - name: gcp-art-registry-credentials
+
+  initContainers:
+    - name: init-container
+      image: busybox:1.34
+      command: ["/bin/sh", "-c"]
+      args: ["cp -r /tmp/scripts /mnt/fabric-jar-exec"]
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - name: scripts
+          mountPath: /mnt/fabric-jar-exec
+      resources:
+        limits:
+          memory: 100Mi
+        requests:
+          memory: 100Mi
+
+  containers:
+    - name: main-container
+      image: openjdk:17-alpine
+      command: ["/bin/sh", "-c"]
+      args: ["sleep 3600"]
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - name: scripts
+          mountPath: /mnt/fabric-jar-exec
