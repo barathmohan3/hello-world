@@ -1,0 +1,25 @@
+# safe pod spec snippet for Jenkins podTemplate / helm template
+initContainers:
+  - name: "{{ (default .Chart.Name \"app\") | lower }}-init"
+    image: "{{ .Values.image.registry }}/{{ .Values.image.namespace }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+    command: [ "/bin/bash", "-c" ]
+    args: [ "cp -r ${SCRIPTS_DIR} /mnt/fabric-jar-exec" ]
+    imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+    resources:
+      limits:
+        memory: 100Mi
+      requests:
+        memory: 100Mi
+    volumeMounts:
+      - name: scripts
+        mountPath: /mnt/fabric-jar-exec
+
+containers:
+  - name: "{{ (default .Chart.Name \"app\") | lower }}"
+    image: "{{ .Values.image.registry }}/{{ .Values.jdk.image.namespace }}/java-open-jdk:{{ .Values.jdk.image.tag }}"
+    command: [ "/bin/bash", "-c" ]
+    args: [ "${SCRIPTS_DIR}/start.sh" ]
+    imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+    volumeMounts:
+      - name: scripts
+        mountPath: /mnt/fabric-jar-exec
