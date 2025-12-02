@@ -6,36 +6,78 @@ metadata:
 spec:
   nodeSelector:
     beta.kubernetes.io/os: linux
-  activeDeadlineSeconds: 10800
+  activeDeadlineSeconds: 108000
 
-  volumes:
-    - name: scripts
-      emptyDir: {}
+  securityContext:
+    runAsUser: 1000
 
   imagePullSecrets:
     - name: gcp-art-registry-credentials
 
+  volumes:
+    - name: jenkins-cache
+      persistentVolumeClaim:
+        claimName: jenkins-cache
+    - name: scripts
+      emptyDir: {}
+
+  # ------------ INIT CONTAINER (runs first) -------------
   initContainers:
-    - name: init-container
-      image: busybox:1.34
+    - name: build-init
+      # use whatever image your manager told (or same as old tools image)
+      image: artifactory.sdlc.ctl.gcp.db.com/dkr-public-local/com/db/afcps/fabric/community-images/jenkins-e-init:latest
       command: ["/bin/sh", "-c"]
-      args: ["cp -r /tmp/scripts /mnt/fabric-jar-exec"]
-      imagePullPolicy: IfNotPresent
+      args:
+        - |
+          echo "Running init container..."
+          # put any setup here, example:
+          mkdir -p /mnt/scripts
+          echo 'echo Hello from init container' > /mnt/scripts/init.sh
+          chmod +x /mnt/scripts/init.sh
       volumeMounts:
         - name: scripts
-          mountPath: /mnt/fabric-jar-exec
+          mountPath: /mnt/scripts
+
+  # ------------ MAIN CONTAINER (Jenkins runs here) ------
+  containers:
+    - name: build          # << keep this name; use as defaultContainer in Jenkinsfile
+      image: artifactory.sdlc.ctl.gcp.db.com/dkr-public-local/com/db/afcps/fabric/community-images/jenkins-e-tools:latest
+      tty: true
+      command: ["/bin/sh", "-c"]
+      args: ["cat"]        # keep container alive, Jenkins attaches
       resources:
         limits:
-          memory: 100Mi
+          memory: 3200Mi
         requests:
-          memory: 100Mi
-
-  containers:
-    - name: main-container
-      image: openjdk:17-alpine
-      command: ["/bin/sh", "-c"]
-      args: ["sleep 3600"]
-      imagePullPolicy: IfNotPresent
+          memory: 50Mi
       volumeMounts:
+        - name: jenkins-cache
+          mountPath: /home/default/.gradle/caches/modules-2/files-2.1
+          subPath: gradle-files
+        - name: jenkins-cache
+          mountPath: /home/default/.gradle/wrapper
+          subPath: gradle-wrapper
         - name: scripts
-          mountPath: /mnt/fabric-jar-exec
+          mountPath: /mnt/scripts
+      env:
+        - name: HTTPS_PROXY
+          value: "dev-net-proxy.intranet.db.com:8080"
+        - name: HTTP_PROXY
+          value: "dev-net-proxy.intranet.db.com:8080"
+        - name: NO_PROXY
+          value: "localhost,intranet.db.com"
+        - name: ARTIFACTORY_USER
+          valueFrom:
+            secretKeyRef:
+              name: artifactory-gcp-credentials
+              key: artifactory-user
+        - name: ARTIFACTORY_KEY
+          valueFrom:
+            secretKeyRef:
+              name: artifactory-gcp-credentials
+              key: artifactory-key
+        - name: SONARQUBE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sonarqube-credentials
+              key: token
